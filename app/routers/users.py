@@ -8,6 +8,8 @@ from app.models import User
 
 from app.schemas import UserCreate, UserResponse
 
+from app.auth import password_hash
+
 router = APIRouter(prefix="/users")
 
 
@@ -15,7 +17,8 @@ router = APIRouter(prefix="/users")
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
     new_user = User(
         username=user.username,
-        email=user.email
+        email=user.email,
+        password_hash=password_hash.hash(user.password)
     )
 
     db.add(new_user)
