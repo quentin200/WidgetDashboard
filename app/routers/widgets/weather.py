@@ -27,6 +27,16 @@ WEATHER_CODES = {
 }
 router = APIRouter(prefix="/widgets/weather")
 
+# helper function to deal with timeout
+def fetch_api(url: str, params: dict):
+    try:
+        response = httpx.get(url, params=params, timeout=5.0)
+        response.raise_for_status()
+        return response.json()
+    except httpx.HTTPError:
+        raise HTTPException(status_code=503, detail="Weather service is unavailable")
+
+
 @router.get("/")
 def get_weather(city: str):
     params = {
@@ -35,9 +45,9 @@ def get_weather(city: str):
         "language": "en",
         "format": "json"
     }
-    response = httpx.get("https://geocoding-api.open-meteo.com/v1/search", params=params)
-    data = response.json()
-    
+
+    data = fetch_api("https://geocoding-api.open-meteo.com/v1/search", params)
+
     # if city doesn't exist
     if not data.get("results"):
         raise HTTPException(status_code=404, detail="City not found")
@@ -50,9 +60,9 @@ def get_weather(city: str):
         "longitude": longitude,
         "current": "temperature_2m,weather_code"
     }
-
-    weather_response = httpx.get("https://api.open-meteo.com/v1/forecast", params=weather_params)
-    weather_data = weather_response.json()
+    
+    
+    weather_data = fetch_api("https://api.open-meteo.com/v1/forecast", weather_params)
 
     temperature = weather_data["current"]["temperature_2m"]
     weather_code = weather_data["current"]["weather_code"]
@@ -61,5 +71,5 @@ def get_weather(city: str):
     return {
         "city": city,
         "temperature": temperature,
-        "weather_code": condition
+        "condition": condition
     }
