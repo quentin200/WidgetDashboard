@@ -17,3 +17,6 @@ class UserLogin(BaseModel):
 class WidgetPreferenceCreate(BaseModel):
     widget_name: str
     config: dict
+
+class WidgetPreferenceUpdate(BaseModel):
+    config: dict

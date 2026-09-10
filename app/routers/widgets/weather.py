@@ -37,8 +37,8 @@ def fetch_api(url: str, params: dict):
         raise HTTPException(status_code=503, detail="Weather service is unavailable")
 
 
-@router.get("/")
-def get_weather(city: str):
+
+def fetch_weather(city: str):
     params = {
         "name": city,
         "count": 1,
@@ -73,3 +73,9 @@ def get_weather(city: str):
         "temperature": temperature,
         "condition": condition
     }
+
+
+@router.get("/")
+def get_weather(city: str):
+    return fetch_weather(city)
+

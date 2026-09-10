@@ -1,4 +1,4 @@
-from sqlalchemy import String, ForeignKey
+from sqlalchemy import String, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -20,6 +20,8 @@ class User(Base):
 
 class WidgetPreference(Base):
     __tablename__ = "widget_preferences"
+
+    __table_args__ = (UniqueConstraint("user_id", "widget_name", name="uq_user_widget"),)
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
