@@ -1,5 +1,9 @@
-from sqlalchemy import String
+from sqlalchemy import String, ForeignKey
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.dialects.postgresql import JSONB
+
+
+config: Mapped[dict] = mapped_column(JSONB)
 
 
 class Base(DeclarativeBase):
@@ -14,4 +18,10 @@ class User(Base):
     email: Mapped[str] = mapped_column(String(250), unique=True)
     password_hash: Mapped[str] = mapped_column(String(128))
 
+class WidgetPreference(Base):
+    __tablename__ = "widget_preferences"
 
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    widget_name: Mapped[str] = mapped_column(String(50))
+    config: Mapped[dict] = mapped_column(JSONB)
