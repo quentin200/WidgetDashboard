@@ -11,7 +11,7 @@ from app.models import User, WidgetPreference
 from app.schemas import WidgetPreferenceCreate, WidgetPreferenceUpdate
 
 from app.routers.widgets.weather import fetch_weather
-
+from app.routers.widgets.github import fetch_github
 router = APIRouter(prefix="/dashboard")
 
 
@@ -61,7 +61,29 @@ def get_dashboard_weather(current_user: User = Depends(get_current_user), db: Se
         raise HTTPException(status_code=400, detail="City not set in weather widget preference")
     
     return fetch_weather(city)
-        
+
+@router.get("/github")
+def get_dashboard_github(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    statement = select(WidgetPreference).where(
+        WidgetPreference.user_id == current_user.id,
+        WidgetPreference.widget_name == "github"
+    )
+
+    result = db.execute(statement)
+    preference = result.scalar_one_or_none()
+
+    if preference is None:
+        raise HTTPException(
+            status_code=404,
+            detail="GitHub widget preference not found"
+        )
+    username = preference.config.get("username")
+    if not username:
+        raise HTTPException(
+            status_code=400,
+            detail="Username not set in GitHub widget preference"
+        )
+    return fetch_github(username)
 
 @router.put("/preferences/{widget_name}")
 def update_widget(
